@@ -502,7 +502,7 @@ func FetchCurrentXkcdComic() (*Xkcd, error) {
 		return nil, err
 	}
 	defer response.Body.Close()
-	if (response.StatusCode != http.StatusOK) {
+	if response.StatusCode != http.StatusOK {
 		return nil, errors.New(response.Status)
 	}
 	var xkcd Xkcd
