@@ -1,0 +1,870 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>go statement considered charmful</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/league.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+<section data-markdown data-separator="^\n----\n$" data-separator-vertical="^\n---\n$">
+<textarea data-template>
+### an introduction to go
+
+![](images/gopher.png)
+
+> [Go is a compiled, concurrent, garbage-collected, statically typed language developed at Google.](https://talks.golang.org/2012/splash.article)
+
+----
+
+### agenda
+
+- some history
+- basic features
+- cool web stuff
+- concurrency
+- interfaces
+
+----
+
+### why go?
+
+In 2007, three guys at Google were frustrated with the existing languages for writing server software:
+- Compiling C++ was too slow
+- Writing Java felt too verbose
+- Aversion against inheritance and design patterns
+- Getting concurrency right was hard
+
+----
+
+### C++
+
+```cpp
+// Within large projects, popular header files
+// get included thousands of times and hence
+// have to be recompiled over and over again
+#include <iostream>
+#include <string>
+#include <vector>
+```
+![](images/compiling.png)
+
+----
+
+### Java
+
+```java
+public class PersonBean {
+	private String name;
+	private int age;
+
+	public PersonBean(String name, int age) {
+		this.name = name;
+		this.age = age;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void setAge(int age) {
+		this.age = age;
+	}
+
+	@Override
+	public String toString() {
+		return "PersonBean [name=" + name + ", age=" + age + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + age;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PersonBean other = (PersonBean) obj;
+		if (age != other.age)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+}
+```
+Rob Pike: [Public Static Void](https://www.youtube.com/watch?v=5kj5ApnhPAE) at OSCON 2010
+
+----
+
+### design
+
+Initial design by 3 people with different backgrounds:
+- Rob Pike (Concurrency)
+- Robert Griesemer (Modules)
+- Ken Thompson (Operating Systems)
+
+All design decisions had to be agreed upon unanimously.
+
+Design team later joined by more people at Google.
+
+----
+
+### philosophy
+
+- simplicity
+- simplicity
+- simplicity
+- clean package model for fast compilation
+- built-in concurrency based on CSP
+- interfaces instead of inheritance
+- no radical changes after Go 1.0
+
+----
+
+### hello world
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("hello world")
+}
+```
+
+- The import declaration imports entire packages
+- All imported names must be qualified
+- Uppercase names are visible to other packages
+- Unused imports are compile-time errors!
+
+----
+
+### IDE support
+
+Go is supported by all major text editors and IDEs:
+
+https://github.com/golang/go/wiki/IDEsAndTextEditorPlugins
+
+Sublime Text with GoSublime is a nice combination:
+```bash
+$ sudo apt install sublime-text
+$ cd ~/.config/sublime-text-3/Packages
+$ git clone https://github.com/DisposaBoy/GoSublime
+$ subl
+```
+But feel free to use whatever floats your boat!
+
+----
+
+### exercises
+Install Go:
+```bash
+$ sudo apt install golang-go
+
+...or download from https://golang.org/dl
+```
+
+Get hello world to work:
+```bash
+$ go run hello.go
+```
+We will only run single files today, not projects.
+
+----
+
+### keywords
+```go
+break       default     func        interface   select
+case        defer       go          map         struct
+chan        else        goto        package     switch
+const       fallthrough if          range       type
+continue    for         import      return      var
+```
+### constants
+```go
+true        false       nil         iota
+```
+### functions
+```go
+new        len          complex     panic
+make       cap          real        recover
+close      append       imag
+           copy 
+           delete
+```
+
+----
+
+### basic types
+```go
+ int    int8    int16    int32    int64
+uint   uint8   uint16   uint32   uint64   uintptr
+
+  float32     float64
+complex64  complex128
+
+bool   byte    rune     string   error
+```
+- int and uint are platform-dependent
+- byte is the same as uint8
+- rune is the same as uint32
+- uintptr is large enough to hold pointers
+- error is a special type for error handling
+
+----
+
+### operators
+```go
+*   /   %   &   &^  <<  >>
++   -   ^   |
+==  !=  <   <=  >   >=
+&&
+||
+```
+- only 5 precedence levels!
+- ^ is both bitwise-xor (infix) and bitwise-not (prefix)
+- &^ is bitwise-andn
+
+----
+
+### declarations
+```go
+// three semantically identical alternatives
+var x int = 0
+var x int
+var x = 0
+
+// fourth alternative for local variables only
+x := 0
+```
+
+----
+
+### strings
+```go
+func main() {
+	var s = "Käsebrötchen"
+	fmt.Println(s)
+	fmt.Println(len(s)) // 14
+
+	// loop over the bytes (UTF-8 code units)
+	for i := 0; i < len(s); i++ {
+		fmt.Printf("%02d: %c\n", i, s[i])
+	}
+
+	// loop over the runes (Unicode code points)
+	for i, r := range s {
+		fmt.Printf("%02d: %c\n", i, r)
+	}
+}
+```
+
+----
+
+### arrays
+```go
+func initSha1(a [20]byte) {
+	// a is an array of 20 bytes
+	a[0] = 0x01
+	a[1] = 0x23
+	a[2] = 0x45
+	a[3] = 0x67
+	// ...
+	fmt.Println(a)
+}
+
+func main() {
+	var x [20]byte // arrays have a fixed size
+	initSha1(x)    // arrays are passed by value!
+	fmt.Println(x) // x remains unchanged
+}
+```
+
+----
+
+### pointers
+```go
+func initSha1(a *[20]byte) {
+	// a is a pointer to an array of 20 bytes
+	a[0] = 0x01
+	a[1] = 0x23
+	a[2] = 0x45
+	a[3] = 0x67
+	// ...
+	fmt.Println(*a)
+}
+
+func main() {
+	var x [20]byte
+	initSha1(&x) // &x is a pointer to x
+	fmt.Println(x)
+}
+```
+
+----
+
+### slices
+```go
+func initSha1(a []byte) {
+	// a is a slice (view) into an array of bytes
+	a[0] = 0x01
+	a[1] = 0x23
+	a[2] = 0x45
+	a[3] = 0x67
+	// ...
+	fmt.Println(a)
+}
+
+func main() {
+	var x [20]byte
+	initSha1(x[:]) // x[:] is a slice (view) into x
+	fmt.Println(x) // x[:] is short-hand for x[0:20]
+}
+```
+
+----
+
+### slices can grow
+```go
+const N = 100
+
+func main() {
+	var compound [N]bool
+	for i := 2; i * i < N; i++ {
+		if !compound[i] {
+			for j := i * i; j < N; j += i {
+				compound[j] = true
+			}
+		}
+	}
+	var primes []int
+	for i := 2; i < N; i++ {
+		if !compound[i] {
+			primes = append(primes, i)
+		}
+	}
+	fmt.Println(primes)
+}
+```
+
+----
+
+### exercises
+
+I. Extract two functions from the last main function:
+- markCompounds
+- gatherPrimes
+
+II. Determine the growth strategy of append by printing after each call:
+- either a pointer to the first element, or
+- the result of calling the special cap function
+
+----
+
+### maps
+```go
+func main() {
+	birth := map[string]int{
+		"C":    1972,
+		"C++":  1983,
+		"Java": 1994,
+	}
+	for language, year := range birth {
+		fmt.Printf("%s was released in %d\n", language, year)
+	}
+	birth["Go"] = 2007
+	examine(birth, "Go")
+	delete(birth, "Go")
+	examine(birth, "Go")
+}
+
+func examine(birth map[string]int, language string) {
+	if year, present := birth[language]; present {
+		fmt.Printf("%s was released in %d\n", language, year)
+	} else {
+		fmt.Printf("Never heard of %s...\n", language)
+	}
+}
+```
+
+----
+
+### exercise
+
+Write a function that counts the occurrences of all characters in a given string.
+
+Which value is returned by map lookup for missing keys?
+
+----
+
+### structs
+```go
+type Person struct {
+	Name string
+	Age  int
+}
+
+func main() {
+	alice := Person{"Alice", 21}
+
+	bob := alice
+	bob.Name = "Bob"
+	bob.Age++
+
+	fmt.Printf( "%v\n", alice) // {Alice 21}
+	fmt.Printf("%#v\n", bob)   // main.Person{Name:"Bob", Age:22}
+}
+```
+structs have value-semantics, just like in C#.
+
+----
+
+### structs
+
+```go
+type Person struct {
+	Name string
+	Age  int
+}
+
+func main() {
+	myBoss := &Person{"Guido", 60}
+
+	yourBoss := myBoss
+	yourBoss.Age++
+
+	fmt.Println(myBoss, yourBoss) // &{Guido 61} &{Guido 61}
+}
+```
+Reference semantics require explicit pointers.
+
+----
+
+### web client
+```go
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+)
+
+// full spec at https://xkcd.com/json.html
+type Xkcd struct {
+	Title string
+	Hover string `json:"alt"`
+}
+
+func FetchCurrentXkcdComic() (*Xkcd, error) {
+	response, err := http.Get("https://xkcd.com/info.0.json")
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if (response.StatusCode != http.StatusOK) {
+		return nil, errors.New(response.Status)
+	}
+	var xkcd Xkcd
+	decoder := json.NewDecoder(response.Body)
+	if err := decoder.Decode(&xkcd); err != nil {
+		return nil, err
+	}
+	return &xkcd, nil
+}
+
+func main() {
+	xkcd, err := FetchCurrentXkcdComic()
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Printf("%s\n\n%s\n", xkcd.Title, xkcd.Hover)
+	}
+}
+```
+
+----
+
+### exercise
+
+Fetch the 3 most recent XKCD comics and print additional information of your choice.
+
+----
+
+### web server
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/", root)
+	fmt.Println("waiting for requests...")
+	http.ListenAndServe(":8080", nil)
+}
+
+var counter = 0
+
+func root(writer http.ResponseWriter, request *http.Request) {
+	fmt.Printf("%s\n\n", request)
+	counter++
+	fmt.Fprintf(writer, "<html><body><pre>")
+	fmt.Fprintln(writer, request.URL.Path)
+	fmt.Fprintf(writer, "%d visits\n", counter)
+	fmt.Fprintf(writer, "</pre></body></html>")
+}
+```
+Compiles and appears to run fine. Where is the bug?
+
+----
+
+### mutex
+
+```go
+import "sync"
+
+var counter = 0
+var mutex sync.Mutex
+
+func root(writer http.ResponseWriter, request *http.Request) {
+	fmt.Printf("%s\n\n", request)
+
+	mutex.Lock()
+	counter++
+	count := counter
+	mutex.Unlock()
+
+	fmt.Fprintf(writer, "<html><body><pre>")
+	fmt.Fprintln(writer, request.URL.Path)
+	fmt.Fprintf(writer, "%d visits\n", count)
+	fmt.Fprintf(writer, "</pre></body></html>")
+}
+```
+
+----
+
+### atomic add
+```go
+import "sync/atomic"
+
+var counter int32
+
+func root(writer http.ResponseWriter, request *http.Request) {
+	fmt.Printf("%s\n\n", request)
+
+	count := atomic.AddInt32(&counter, 1)
+
+	fmt.Fprintf(writer, "<html><body><pre>")
+	fmt.Fprintln(writer, request.URL.Path)
+	fmt.Fprintf(writer, "%d visits\n", count)
+	fmt.Fprintf(writer, "</pre></body></html>")
+}
+```
+
+----
+
+### exercise
+
+Write a web server that generates a web page with ~3 random XKCD comics.
+
+![](images/book_burning.png)
+![](images/rock_band.png)
+
+----
+
+### channels and goroutines
+
+```go
+package main
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+)
+
+// full spec at https://api.stackexchange.com/docs/info
+type Item struct {
+	Users     int `json:"total_users"`
+	Questions int `json:"total_questions"`
+	Answers   int `json:"total_answers"`
+	Comments  int `json:"total_comments"`
+}
+
+type Info struct {
+	Site  string
+	Items []Item
+}
+
+func FetchInfo(site string, infos chan *Info, errs chan error) {
+	url := "https://api.stackexchange.com/2.2/info?site=" + site
+	response, err := http.Get(url)
+	if err != nil {
+		errs <- err
+		return
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		errs <- errors.New(response.Status)
+		return
+	}
+	var info Info
+	decoder := json.NewDecoder(response.Body)
+	if err := decoder.Decode(&info); err != nil {
+		errs <- err
+		return
+	}
+	info.Site = site
+	infos <- &info
+}
+
+func main() {
+	sites := [...]string{
+		"stackoverflow",
+		"serverfault",
+		"superuser"}
+
+	infos := make(chan *Info)
+	errs := make(chan error)
+
+	for _, site := range sites {
+		go FetchInfo(site, infos, errs)
+	}
+
+	for range sites {
+		select {
+		case info := <-infos:
+			fmt.Printf("%#v\n\n", info)
+		case err := <-errs:
+			fmt.Printf("%s\n\n", err)
+		}
+	}
+}
+```
+
+----
+
+### exercise
+
+Have your web server fetch the random XKCD comics concurrently.
+
+----
+
+### circles and rectangles
+```go
+package main
+
+import (
+	"fmt"
+	"math"
+)
+
+type Circle struct {
+	Radius float64
+}
+
+type Rectangle struct {
+	Width  float64
+	Height float64
+}
+
+func areaCircle(circ *Circle) float64 {
+	return math.Pi * circ.Radius * circ.Radius
+}
+
+// You need distinct function names for areas
+// because Go does not support overloading
+
+func areaRectangle(rect *Rectangle) float64 {
+	return rect.Width * rect.Height
+}
+
+func main() {
+	c := Circle{Radius: 2}
+	r := Rectangle{Width: 16, Height: 9}
+
+	fmt.Printf("%#v -> %f\n", c, areaCircle(&c))
+	fmt.Printf("%#v -> %f\n", r, areaRectangle(&r))
+}
+```
+
+----
+
+### methods
+
+```go
+func (circ *Circle) Area() float64 {
+	return math.Pi * circ.Radius * circ.Radius
+}
+
+// Methods have an additional receiver argument
+// and can be overloaded by their receiver
+
+func (rect *Rectangle) Area() float64 {
+	return rect.Width * rect.Height
+}
+
+func main() {
+	c := Circle{Radius: 2}
+	r := Rectangle{Width: 16, Height: 9}
+
+	fmt.Printf("%#v -> %f\n", c, c.Area())
+	fmt.Printf("%#v -> %f\n", r, r.Area())
+}
+```
+
+----
+
+### interfaces
+```go
+type Shape interface {
+	Area() float64
+}
+
+// *Circle and *Rectangle implicitly implement Shape
+// because they provide an Area() float64 method
+
+func main() {
+	shapes := [...]Shape{
+		&Circle{Radius: 2},
+		&Rectangle{Width: 16, Height: 9},
+	}
+
+	for _, shape := range shapes {
+		fmt.Printf("%#v -> %f\n", shape, shape.Area())
+	}
+}
+```
+
+----
+
+### Stringer
+
+```go
+/*
+package fmt
+
+type Stringer interface {
+	String() string
+}
+*/
+type Shape interface {
+	fmt.Stringer
+	Area() float64
+}
+
+func (circ *Circle) String() string {
+	return fmt.Sprintf("(%f)", circ.Radius)
+}
+
+func (rect *Rectangle) String() string {
+	return fmt.Sprintf("[%f x %f]", rect.Width, rect.Height)
+}
+
+func main() {
+	shapes := [...]Shape{
+		&Circle{Radius: 2},
+		&Rectangle{Width: 16, Height: 9},
+	}
+
+	for _, shape := range shapes {
+		fmt.Printf("%s -> %f\n", shape.String(), shape.Area())
+	}
+}
+```
+
+----
+
+### exercise
+
+Implement 2 additional shapes: Square and Triangle
+
+----
+
+### where do we go now?
+
+https://golang.org/doc/
+
+https://gobyexample.com/
+
+https://blog.golang.org/
+
+https://forum.golangbridge.org/
+
+https://groups.google.com/forum/#!forum/golang-nuts
+
+https://stackoverflow.com/questions/tagged/go
+
+https://www.reddit.com/r/golang/
+
+http://www.gopl.io/
+
+</textarea>
+</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+			Reveal.configure({ transition: 'none', center: false });
+		</script>
+	</body>
+</html>
