@@ -216,7 +216,7 @@ data class PersonBean(val name: String, val age: Int)
   - Other popular text editors have good support, too
   - https://www.jetbrains.com/go requires license
 
-### Hello World
+### [Hello World](https://play.golang.org/p/NrLk9EUk4Hs)
 
 ```go
 package main
@@ -332,7 +332,7 @@ var c = 0
 d := 0
 ```
 
-## Strings
+## [Strings](https://play.golang.org/p/HokDf_Lo7Zx)
 
 ```go
 func main() {
@@ -353,7 +353,7 @@ func main() {
 }
 ```
 
-## Arrays
+## [Arrays](https://play.golang.org/p/ZdW81c_N_1k)
 
 ```go
 func initPrimes(a [4]int) {
@@ -372,7 +372,7 @@ func main() {
 }
 ```
 
-## Pointers
+## [Pointers](https://play.golang.org/p/NDSZJ6qF-BT)
 
 ```go
 func initPrimes(p *[4]int) {
@@ -391,7 +391,7 @@ func main() {
 }
 ```
 
-## Slices
+## [Slices](https://play.golang.org/p/TTTKTypwJdY)
 
 ```go
 func initPrimes(s []int) {
@@ -422,7 +422,7 @@ struct SliceInt {
 };
 ```
 
-### Slices can grow
+### [Slices can grow](https://play.golang.org/p/mYaDW1fJy1P)
 
 ```go
 const N = 100
@@ -455,7 +455,7 @@ func main() {
    - either a pointer to the first element, or
    - the result of calling the special `cap` function
 
-## Maps
+## [Maps](https://play.golang.org/p/3Vw00ZRxyMw)
 
 ```go
 func main() {
@@ -487,7 +487,7 @@ func examine(birth map[string]int, language string) {
 - Write a function that counts the occurrences of all characters in a given string
   - Which value does map lookup return for missing keys?
 
-## Structs
+## [Structs](https://play.golang.org/p/P6wW9dH15gI)
 
 ```go
 type Person struct {
@@ -508,7 +508,7 @@ func main() {
 ```
 
 - Structs have value semantics, just like in C#
-- Reference semantics require explicit pointers:
+- [Reference semantics require explicit pointers](https://play.golang.org/p/y9E4pqFyquQ):
 
 ```go
 type Person struct {
@@ -528,7 +528,7 @@ func main() {
 
 # Web programming
 
-## Web client
+## [Web client](https://play.golang.org/p/6WefHQbYuBN)
 
 ```go
 package main
@@ -697,7 +697,7 @@ func root(writer http.ResponseWriter, request *http.Request) {
 
 # Goroutines and Channels
 
-## Goroutines
+## [Goroutines](https://play.golang.org/p/B4KqLy5243O)
 
 - Goroutines are "lightweight threads"
   - 2 kib of initial stack space
@@ -728,7 +728,7 @@ func main() {
 ```
 
 - The program ends when `main` ends
-- Nonsolution: Sleep before ending `main`
+- [Nonsolution](https://play.golang.org/p/OOOiey2QLkc): Sleep before ending `main`
 
 ```go
 func main() {
@@ -744,7 +744,7 @@ func main() {
 }
 ```
 
-## WaitGroup
+## [WaitGroup](https://play.golang.org/p/xW2Ornunzw2)
 
 ```go
 var wg sync.WaitGroup
@@ -773,7 +773,7 @@ func main() {
 - WaitGroups can be reused, hence global variables are idiomatic
 - Alternatively, pass pointer (!) into goroutine
 
-## Channels, selection and timeouts
+## [Channels, selection and timeouts](https://play.golang.org/p/StoZ1gUL05J)
 
 - Sender goroutine communicates data to Receiver goroutine via Channel
 - Usage:
@@ -830,7 +830,7 @@ receiving:
 }
 ```
 
-## Closing channels
+## [Closing channels](https://play.golang.org/p/PYadewE7t8O)
 
 ```go
 func main() {
@@ -862,7 +862,7 @@ func main() {
 
 - Data sent before closing is still receivable
 
-## Iterating over channels
+## [Iterating over channels](https://play.golang.org/p/M-K56SYZl8I)
 
 ```go
 func main() {
@@ -887,7 +887,7 @@ func main() {
 }
 ```
 
-## Simulating WaitGroups with channels
+## [Simulating WaitGroups with channels](https://play.golang.org/p/B981_inaoSI)
 
 ```go
 func count(animal string, n int, messages chan<- string, done chan<- time.Time) {
@@ -930,7 +930,7 @@ func main() {
 
 # Object-oriented programming
 
-## Circles and Rectangles
+## [Circles and Rectangles](https://play.golang.org/p/waPR2jGjVbH)
 
 ```go
 package main
@@ -969,7 +969,7 @@ func main() {
 }
 ```
 
-## Methods
+## [Methods](https://play.golang.org/p/uHJJavD9h5Z)
 
 ```go
 func (circ *Circle) Area() float64 {
@@ -992,7 +992,7 @@ func main() {
 }
 ```
 
-## Interfaces
+## [Interfaces](https://play.golang.org/p/oSHdeuPJuaY)
 
 ```go
 type Shape interface {
@@ -1014,7 +1014,7 @@ func main() {
 }
 ```
 
-### Stringer
+### [Stringer](https://play.golang.org/p/F11mrl_mDcp)
 
 ```go
 /*
