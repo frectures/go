@@ -1,4 +1,6 @@
-> # [Go is a compiled, concurrent, garbage-collected, statically typed language developed at Google.](https://talks.golang.org/2012/splash.article)
+# Go
+
+> [Go is a compiled, concurrent, garbage-collected, statically typed language developed at Google. It is an open source project](https://talks.golang.org/2012/splash.article)
 
 ![](images/gopher.png)
 ![](images/wps2go.svg)
@@ -24,7 +26,7 @@ In 2007, three guys at Google were frustrated with the existing languages for wr
 > *Design Patterns, Elements of Reusable Object-Oriented Software* (1994)
 >
 > The choice of programming language is important because it influences one's point of view.
-> Our patterns assume Smalltalk/C++-level language features, and that choice determines what can and cannot be implemented easily.
+> **Our patterns assume Smalltalk/C++-level language features**, and that choice determines what can and cannot be implemented easily.
 > **If we assumed procedural languages, we might have included design patterns called "Inheritance," "Encapsulation," and "Polymorphism."**
 
 ```c
@@ -81,22 +83,27 @@ circle.intersects(line); // Which method is called?
 ```clj
 (defmulti intersect?
   (fn [^Shape a, ^Shape b]
-                     (type a) (type b)))
+                    [(type a) (type b)]))
 
 (defmethod intersect? [Circle Circle]
-  ([a b] ...))
+  ([a b] 5))
 
 (defmethod intersect? [Circle Line  ]
-  ([a b] ...))
+  ([a b] 6))
 
 (defmethod intersect? [Line   Circle]
-  ([a b] ...))
+  ([a b] 8))
 
 (defmethod intersect? [Line   Line  ]
-  ([a b] ...))
+  ([a b] 9))
+
+
+(let [^Shape circle (->Circle)
+      ^Shape line   (->Line)]
+  (intersect? circle line)) ; 6
 ```
 
-Nicolai Parlog (Java Developer Advocate at Oracle) – [Visitor Pattern Considered Pointless, Use Pattern Switches Instead](https://nipafx.dev/java-visitor-pattern-pointless)
+Nicolai Parlog (Java Developer Advocate at Oracle) – [Visitor Pattern Considered Pointless, Use Pattern Switches Instead](https://nipafx.dev/java-visitor-pattern-pointless/)
 
 > In fact, there are enough differences between Smalltalk and C++ to mean that some patterns can be expressed more easily in one language than the other. (**See Iterator for example.**)
 
@@ -106,12 +113,35 @@ Iterators (pattern) have been superseded by Generators (language feature)
 - EcmaScript 6 (`yield` since 2015)
 - Kotlin 1.3 (`suspend`/`yield()` since 2018)
 
+```python
+def fibonacciSequence():
+    a = 0
+    yield a
+    
+    b = 1
+    yield b
+    
+    while True:
+        c = a + b
+        yield c
+        
+        a = b
+        b = c
+
+
+for fib in fibonacciSequence():
+    if (fib >= 1000):
+        break
+    print(fib)
+```
+
 ### C++
 
 ```cpp
 // Within large projects, popular header files
 // get included thousands of times and hence
 // have to be recompiled over and over again
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -122,70 +152,71 @@ Iterators (pattern) have been superseded by Generators (language feature)
 ### Java
 
 ```java
-public class PersonBean {
-	private String name;
-	private int age;
+public class PersonDto {
+    private String name;
+    private int age;
 
-	public PersonBean(String name, int age) {
-		this.name = name;
-		this.age = age;
-	}
+    public PersonDto(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public int getAge() {
-		return age;
-	}
+    public int getAge() {
+        return age;
+    }
 
-	public void setAge(int age) {
-		this.age = age;
-	}
+    public void setAge(int age) {
+        this.age = age;
+    }
 
-	@Override
-	public String toString() {
-		return "PersonBean [name=" + name + ", age=" + age + "]";
-	}
+    @Override
+    public String toString() {
+        return "PersonDto [name=" + name + ", age=" + age + "]";
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + age;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + age;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		PersonBean other = (PersonBean) obj;
-		if (age != other.age)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PersonDto other = (PersonDto) obj;
+        if (age != other.age)
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        return true;
+    }
 }
 ```
 
 Rob Pike: [Public Static Void](https://www.youtube.com/watch?v=5kj5ApnhPAE) at OSCON 2010
 
 ```kt
-data class PersonBean(val name: String, val age: Int)
+// Kotlin
+data class PersonDto(var name: String, var age: Int)
 ```
 
 ## Design
@@ -203,20 +234,20 @@ data class PersonBean(val name: String, val age: Int)
 - Fast compilation
 - Communicating sequential processes
 - Interfaces yay, Inheritance nay
-- No radical changes after Go 1.0
-- Generics finally arriving in Go 1.18
+- No radical changes after Go 1.0 (March 2012)
+- Generics finally arrived in Go 1.18 (March 2022)
 
 ![](images/aboriginal.png)
 
 ## Prerequisites
 
-- Download from https://golang.org/dl and install
-  - or use https://play.golang.org for simple examples
+- Download from https://go.dev/dl/ and install
+  - or use https://go.dev/play/ for simple examples
 - Visual Studio Code with https://marketplace.visualstudio.com/items?itemName=golang.Go
   - Other popular text editors have good support, too
-  - https://www.jetbrains.com/go requires license
+  - https://www.jetbrains.com/go/ requires license
 
-### [Hello World](https://play.golang.org/p/NrLk9EUk4Hs)
+### [Hello World](https://go.dev/play/p/NrLk9EUk4Hs)
 
 ```go
 package main
@@ -274,13 +305,13 @@ goto
 
 ## Constants
 
-```go
+```
 true        false       nil         iota
 ```
 
 ## Functions
 
-```go
+```
 new        len          complex     panic
 make       cap          real        recover
 close      append       imag
@@ -290,7 +321,7 @@ close      append       imag
 
 ## Basic types
 
-```go
+```
  int    int8    int16    int32    int64
 uint   uint8   uint16   uint32   uint64   uintptr
 
@@ -308,7 +339,7 @@ bool   byte    rune     string   error
 
 ## Operators
 
-```go
+```
 *   /   %   &   &^  <<  >>
 +   -   ^   |
 ==  !=  <   <=  >   >=
@@ -332,7 +363,7 @@ var c = 0
 d := 0
 ```
 
-## [Strings](https://play.golang.org/p/HokDf_Lo7Zx)
+## [Strings](https://go.dev/play/p/HokDf_Lo7Zx)
 
 ```go
 func main() {
@@ -353,7 +384,7 @@ func main() {
 }
 ```
 
-## [Arrays](https://play.golang.org/p/ZdW81c_N_1k)
+## [Arrays](https://go.dev/play/p/ZdW81c_N_1k)
 
 ```go
 func initPrimes(a [4]int) {
@@ -372,7 +403,7 @@ func main() {
 }
 ```
 
-## [Pointers](https://play.golang.org/p/NDSZJ6qF-BT)
+## [Pointers](https://go.dev/play/p/NDSZJ6qF-BT)
 
 ```go
 func initPrimes(p *[4]int) {
@@ -391,7 +422,7 @@ func main() {
 }
 ```
 
-## [Slices](https://play.golang.org/p/TTTKTypwJdY)
+## [Slices](https://go.dev/play/p/TTTKTypwJdY)
 
 ```go
 func initPrimes(s []int) {
@@ -416,13 +447,13 @@ func main() {
 
 ```c
 struct SliceInt {
-	int*   ptr;
-	size_t len;
-	size_t cap;
+    int*   ptr;
+    size_t len;
+    size_t cap;
 };
 ```
 
-### [Slices can grow](https://play.golang.org/p/mYaDW1fJy1P)
+### [Slices can grow](https://go.dev/play/p/mYaDW1fJy1P)
 
 ```go
 const N = 100
@@ -455,7 +486,7 @@ func main() {
    - either a pointer to the first element, or
    - the result of calling the special `cap` function
 
-## [Maps](https://play.golang.org/p/3Vw00ZRxyMw)
+## [Maps](https://go.dev/play/p/3Vw00ZRxyMw)
 
 ```go
 func main() {
@@ -487,7 +518,7 @@ func examine(birth map[string]int, language string) {
 - Write a function that counts the occurrences of all characters in a given string
   - Which value does map lookup return for missing keys?
 
-## [Structs](https://play.golang.org/p/P6wW9dH15gI)
+## [Structs](https://go.dev/play/p/P6wW9dH15gI)
 
 ```go
 type Person struct {
@@ -508,7 +539,7 @@ func main() {
 ```
 
 - Structs have value semantics, just like in C#
-- [Reference semantics require explicit pointers](https://play.golang.org/p/y9E4pqFyquQ):
+- [Reference semantics require explicit pointers](https://go.dev/play/p/y9E4pqFyquQ):
 
 ```go
 type Person struct {
@@ -528,7 +559,7 @@ func main() {
 
 # Web programming
 
-## [Web client](https://play.golang.org/p/6WefHQbYuBN)
+## [Web client](https://go.dev/play/p/6WefHQbYuBN)
 
 ```go
 package main
@@ -697,16 +728,16 @@ func root(writer http.ResponseWriter, request *http.Request) {
 
 # Goroutines and Channels
 
-## [Goroutines](https://play.golang.org/p/B4KqLy5243O)
+## [Goroutines](https://go.dev/play/p/B4KqLy5243O)
 
 - Goroutines are "lightweight threads"
-  - 2 kib of initial stack space
-  - function call overhead 3 CPU instructions
+  - 2048 bytes of initial stack space
+  - Context switches take nanoseconds instead of microseconds
   - 10,000 or 100,000 goroutines? No problem!
 - Goroutines support *parallel programming* (multicore optimization)
   - But primary motivation is *concurrent programming* (concurrency by design)
-- Goroutines make *asynchronous programming* largely redundant
-  - IO without callbacks, promises, futures, observables, subscribe, async/await etc.
+- Goroutines make non-blocking *asynchronous programming* largely redundant
+  - callbacks, promises, futures, observables, subscribe, `async`/`await` etc.
 
 ```go
 func count(animal string, n int) {
@@ -728,7 +759,7 @@ func main() {
 ```
 
 - The program ends when `main` ends
-- [Nonsolution](https://play.golang.org/p/OOOiey2QLkc): Sleep before ending `main`
+- [Nonsolution](https://go.dev/play/p/OOOiey2QLkc): Sleep before ending `main`
 
 ```go
 func main() {
@@ -744,7 +775,7 @@ func main() {
 }
 ```
 
-## [WaitGroup](https://play.golang.org/p/xW2Ornunzw2)
+## [WaitGroup](https://go.dev/play/p/xW2Ornunzw2)
 
 ```go
 var wg sync.WaitGroup
@@ -773,7 +804,7 @@ func main() {
 - WaitGroups can be reused, hence global variables are idiomatic
 - Alternatively, pass pointer (!) into goroutine
 
-## [Channels, selection and timeouts](https://play.golang.org/p/StoZ1gUL05J)
+## [Channels, selection and timeouts](https://go.dev/play/p/vxvTEts2kpW)
 
 - Sender goroutine communicates data to Receiver goroutine via Channel
 - Usage:
@@ -781,8 +812,8 @@ func main() {
   - Receive: `<-channel`
 - Types:
   - `chan T` send/receive
-  - `<-chan` receive-only
-  - `chan<-` send-only
+  - `<-chan T` receive-only
+  - `chan<- T` send-only
 - Creation:
   - Unbuffered: `make(chan T)`
     - send blocks until receive
@@ -817,7 +848,7 @@ receiving:
 			fmt.Println(message)
 
 		case <-deadline:
-			fmt.Println("deadline")
+			fmt.Println("10 seconds have elapsed")
 			break receiving
 
 		case <-time.After(time.Second):
@@ -830,7 +861,7 @@ receiving:
 }
 ```
 
-## [Closing channels](https://play.golang.org/p/PYadewE7t8O)
+## [Closing channels](https://go.dev/play/p/PYadewE7t8O)
 
 ```go
 func main() {
@@ -862,7 +893,7 @@ func main() {
 
 - Data sent before closing is still receivable
 
-## [Iterating over channels](https://play.golang.org/p/M-K56SYZl8I)
+## [Iterating over channels](https://go.dev/play/p/M-K56SYZl8I)
 
 ```go
 func main() {
@@ -887,7 +918,7 @@ func main() {
 }
 ```
 
-## [Simulating WaitGroups with channels](https://play.golang.org/p/B981_inaoSI)
+## [Simulating WaitGroups with channels](https://go.dev/play/p/B981_inaoSI)
 
 ```go
 func count(animal string, n int, messages chan<- string, done chan<- time.Time) {
@@ -930,7 +961,7 @@ func main() {
 
 # Object-oriented programming
 
-## [Circles and Rectangles](https://play.golang.org/p/waPR2jGjVbH)
+## [Circles and Rectangles](https://go.dev/play/p/waPR2jGjVbH)
 
 ```go
 package main
@@ -969,7 +1000,7 @@ func main() {
 }
 ```
 
-## [Methods](https://play.golang.org/p/uHJJavD9h5Z)
+## [Methods](https://go.dev/play/p/uHJJavD9h5Z)
 
 ```go
 func (circ *Circle) Area() float64 {
@@ -992,7 +1023,7 @@ func main() {
 }
 ```
 
-## [Interfaces](https://play.golang.org/p/oSHdeuPJuaY)
+## [Interfaces](https://go.dev/play/p/oSHdeuPJuaY)
 
 ```go
 type Shape interface {
@@ -1014,7 +1045,7 @@ func main() {
 }
 ```
 
-### [Stringer](https://play.golang.org/p/F11mrl_mDcp)
+### [Stringer](https://go.dev/play/p/F11mrl_mDcp)
 
 ```go
 /*
@@ -1024,6 +1055,7 @@ type Stringer interface {
 	String() string
 }
 */
+
 type Shape interface {
 	fmt.Stringer
 	Area() float64
@@ -1061,7 +1093,7 @@ func main() {
   - `GOOS` (aix, android, darwin (macOS and iOS), dragonfly, freebsd, hurd, illumos, js, linux, netbsd, openbsd, plan9, solaris, windows, zos)
   - `GOARCH` (probably amd64, arm64 or 386)
 - `go tool dist list` shows all supported platforms
-- See https://golang.org/doc/install/source for details
+- See https://go.dev/doc/install/source for details
 
 ## Structure of a Go Program
 
@@ -1078,13 +1110,13 @@ func main() {
 
 ## Where do we Go now?
 
-https://golang.org/doc
+https://go.dev/doc/
 
 https://pkg.go.dev/std
 
 https://go-proverbs.github.io
 
-https://go.dev/blog
+https://go.dev/blog/
 
 https://gobyexample.com
 
@@ -1092,4 +1124,4 @@ https://forum.golangbridge.org
 
 https://groups.google.com/g/golang-nuts
 
-http://www.gopl.io
+https://www.gopl.io
